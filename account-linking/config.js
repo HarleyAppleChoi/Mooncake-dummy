@@ -8,7 +8,7 @@ const config = {
     jwks_uri: AUTH_SERVER + '/oauth/keys',
     token_endpoint: AUTH_SERVER + '/oauth/token',
   },
-  client_id: '4d0d21ec-fc2c-4f65-acc7-f62d0501511c',
+  client_id: '7a6c29fa-341b-471f-bcc9-12cbbd24dc36',
   redirect_uri: 'http://localhost:4050/callback',
   response_type: 'code',
   scope: 'openid',
