@@ -79,24 +79,80 @@ bio
   }
   `;
 
-  console.log(_postContents)
+
+const query = `posts: post(
+  where: {
+    parent_id: {_is_null: true},
+    subspace: {_eq: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  }
+  order_by: { created: desc },
+  offset: 1,
+  limit: 11,
+) {
+  id
+  parent_id
+  subspace
+  created
+  hidden
+  last_edited
+  allows_comments
+  message
+  optional_data
+  media: medias {
+    uri
+    mime_type
+  }
+  poll {
+    question
+    end_date
+    allows_answer_edits
+    allows_multiple_answers
+    available_answers {
+      id: answer_id
+      text: answer_text
+    }
+    user_answers {
+      answer
+      user {
+        address
+dtag
+moniker
+cover_pic
+profile_pic
+bio
+      }
+    }
+  }
+  reactions {
+    user: owner {
+      address
+dtag
+moniker
+cover_pic
+profile_pic
+bio
+    }
+    value
+  }
+  user: creator {
+    address
+dtag
+moniker
+cover_pic
+profile_pic
+bio
+  }
+  comments: comments {
+    id
+  }
+}`
 
   //getPostDetails
   fetch('https://m1k.gql.morpheus.desmos.network/v1/graphql', { 
     method: 'POST',   
     headers: { 'Content-Type': 'application/json' },   
     body: JSON.stringify({ 
-      query: `posts: post(
-        where: {
-          parent_id: {_is_null: true},
-          subspace: {_eq: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
-        }
-        order_by: { created: desc },
-        offset: 1,
-        limit: 11,
-      ) {
-        `+_postContents+`
-      }` }), 
+      query: query}), 
     })   .then(res => res.json())
     .then(res => console.log(res.data));
 
