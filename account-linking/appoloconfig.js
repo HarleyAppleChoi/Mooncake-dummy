@@ -1,8 +1,8 @@
-import { gql } from '@apollo/client';
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { gql } from './node_modules/@apollo/client';
+import { ApolloClient, InMemoryCache } from './node_modules/@apollo/client';
 
 const client = new ApolloClient({
-  uri: 'https://48p1r2roz4.sse.codesandbox.io',
+  uri: 'https://gql.morpheus.desmos.network/',
   cache: new InMemoryCache()
 });
 // const client = ...
@@ -10,11 +10,12 @@ const client = new ApolloClient({
 client
   .query({
     query: gql`
-      query GetRates {
-        rates(currency: "USD") {
-          currency
-        }
+          query MyQuery {
+      block(limit: 1) {
+        height
       }
+    }
+
     `
   })
   .then(result => console.log(result));
