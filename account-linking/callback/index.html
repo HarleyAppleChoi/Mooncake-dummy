@@ -13,7 +13,7 @@
   <body>
     <div class="main">
       <div id="response">
-        <div id="myData"></div>
+        <button id="myData" data-cy="myData"></button>
         <h2>Welcome to All My Chard</h2>
         <!-- like button to see which post (0-11) to like -->
         <h2>Like which post?</h2>
@@ -140,15 +140,15 @@ const query = `{
     body: JSON.stringify({ 
       query: query}), 
     })   .then(res => res.json())
-    .then(json => console.log(json))
+    .then(json => json)
     .then(data => 
-      
       {
+        console.log(json)
         var listItem = document.getElementById('myData');
-        for(var i = 0;i< data.posts.length;i++) {
-        listItem.innerHTML = 'posts:'+ data.post[i].message ;
-        listItem.innerHTML +=' created in: ' + data.post[i].created + '.';
-        listItem.innerHTML +=' Post by :' + data.post[i].address;
+        for(var i = 0;i< data.data.posts.length;i++) {
+        listItem.innerHTML = 'posts:'+ data.data.posts[i].message ;
+        listItem.innerHTML +=' created in: ' + data.data.posts[i].created + '.';
+        listItem.innerHTML +=' Post by :' + data.data.posts[i].address;
         myList.appendChild(listItem);
       }})
     .catch(err => console.log(err.message, 'error'))
