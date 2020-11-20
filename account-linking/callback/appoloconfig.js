@@ -161,8 +161,10 @@ const query = `{
     })   .then(res => res.json())
     .then(json => console.log(json))
     .then(data => 
-      {for(var i = 0;i< data.post;i++) {
-        var listItem = document.createElement('li');
+      
+      {
+        var listItem = document.getElementById('myData');
+        for(var i = 0;i< data.posts.length;i++) {
         listItem.innerHTML = 'posts:'+ data.post[i].message ;
         listItem.innerHTML +=' created in: ' + data.post[i].created + '.';
         listItem.innerHTML +=' Post by :' + data.post[i].address;
