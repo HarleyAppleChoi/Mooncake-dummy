@@ -159,15 +159,15 @@ const query = `{
     body: JSON.stringify({ 
       query: query}), 
     })   .then(res => res.json())
+    .then(json => console.log(json))
     .then(data => 
       {for(var i = 0;i< data.post;i++) {
         var listItem = document.createElement('li');
-        listItem.innerHTML = 'posts:'+ post.message ;
-        listItem.innerHTML +=' created in: ' + post.created + '.';
-        listItem.innerHTML +=' Post by :' + post.address;
+        listItem.innerHTML = 'posts:'+ data.post[i].message ;
+        listItem.innerHTML +=' created in: ' + data.post[i].created + '.';
+        listItem.innerHTML +=' Post by :' + data.post[i].address;
         myList.appendChild(listItem);
       }})
-    .then(json => console.log(json))
     .catch(err => console.log(err.message, 'error'))
     ;
 
