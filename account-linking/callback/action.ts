@@ -1,62 +1,24 @@
+// **this should be a server side script**
+/* Set up environment variable first */
 import * as Parcel from '@oasislabs/parcel-sdk';
 
 const configParams = Parcel.Config.paramsFromEnv();
 const config = new Parcel.Config(configParams);
 
-async function main(address:string,actual_data:string) {
-    /* // Find the identity address associated with the private key you supplied
-    // above.
-    const identityAddress = Parcel.Identity.addressFromToken(await config.tokenProvider.getToken());
-
-    // Let's connect to the identity.
-    const identity = await Parcel.Identity.connect(identityAddress, config);
-    console.log(`Connected to identity at address ${identity.address.hex}`);
-
-    // Now let's upload a dataset.
-    const datasetMetadata = {
-        title: 'My First Dataset',
-        // A (fake) example metadata URL.
-        metadataUrl: 'http://s3-us-west-2.amazonaws.com/my_first_metadata.json',
-    };
-
-    // The dataset: 'hooray!', encoded as a Uint8Array.
-    const data = new TextEncoder().encode('hooray!');
-    console.log('Uploading data for our user');
-    const dataset = await Parcel.Dataset.upload(data, datasetMetadata, identity, config);
-    // `dataset.address.hex` is your dataset's unique ID.
-    console.log(
-        `Created dataset with address ${dataset.address.hex} and uploaded to ${dataset.metadata.dataUrl}`,
-    );
-
-    // By default, the dataset owner can download the data.
-  const datasetToDownload = await Parcel.Dataset.connect(dataset.address, identity, config);
-  
-  console.log(`Connected to dataset ${datasetToDownload.address.hex}`);
-    const secretDataStream = datasetToDownload.download();
-    const secretDatasetWriter = secretDataStream.pipe(
-        require('fs').createWriteStream('./user_data'),
-    );
-
-    // Utility method.
-    const streamFinished = require('util').promisify(require('stream').finished);
-    try {
-        await streamFinished(secretDatasetWriter);
-        console.log(`Dataset ${datasetToDownload.address.hex} has been downloaded to ./user_data`);
-    } catch (e) {
-        throw new Error(`Failed to download dataset at ${datasetToDownload.address.hex}`);
-    }
-    const secretData = require('fs').readFileSync('./user_data').toString();
-  console.log(`Hey dataset owner! Here's your data: ${secretData}\n`);
-   */
+export async function uploadsToParcel(address: string, actual_data: string) {
   //upload for other people
-  const aliceConfig = new Parcel.Config(Parcel.Config.paramsFromEnv());
-  const aliceIdentityAddress = Parcel.Identity.addressFromToken(
-      await aliceConfig.tokenProvider.getToken(),
+  console.log(address+" "+actual_data)
+  const adminConfig = new Parcel.Config(Parcel.Config.paramsFromEnv());
+  const adminIdentityAddress = Parcel.Identity.addressFromToken(
+    await adminConfig.tokenProvider.getToken(),
   );
-  const aliceIdentity = await Parcel.Identity.connect(aliceIdentityAddress, config);
+  const adminIdentity = await Parcel.Identity.connect(adminIdentityAddress, config);
 
-  const bobIdentityAddress = new Parcel.Address(address)
-  const bobIndentity = await Parcel.Identity.connect(bobIdentityAddress, config)
+  const endUserConfig = new Parcel.Config({
+    apiAccessToken: "AAAAGYHZxhwjJXjnGEIiyDCyZJq+Prknbneb9gYe9teCKrGa",
+  });
+  const endUserIdentityAddress = new Parcel.Address(address);
+  const endUserIndentity = await Parcel.Identity.connect(endUserIdentityAddress, endUserConfig);
 
   const datasetMetadata = {
     title: "User's data",
@@ -68,64 +30,116 @@ async function main(address:string,actual_data:string) {
   const dataset = await Parcel.Dataset.upload(
     data,
     datasetMetadata,
-    // The dataset is uploaded for Bob...
-    await Parcel.Identity.connect(bobIdentityAddress, aliceConfig),
-    // ...with Alice's credentials being used to do the upload...
-    aliceConfig,
+    // The dataset is uploaded for endUser...
+    await Parcel.Identity.connect(endUserIdentityAddress, adminConfig),
+    // ...with admin's credentials being used to do the upload...
+    adminConfig,
     {
-        // ...and Alice is flagged as the dataset's creator.
-        creator: aliceIdentity,
+      // ...and admin is flagged as the dataset's creator.
+      creator: adminIdentity,
     },
   );
 
   console.log(
     `Created dataset with address ${dataset.address.hex} and uploaded to ${dataset.metadata.dataUrl}\n`,
   );
-  //try to download using alice identity
-/* const datasetToDownload = await Parcel.Dataset.connect(dataset.address, aliceIdentity, config);
 
-  try {
-  console.log(`Attempting to access Bob's data without permission...`);
-  await new Promise((resolve, reject) => {
-      const decryptedStream = datasetToDownload.download();
-      decryptedStream.on('error', reject);
-      decryptedStream.on('end', resolve);
-  });
-  throw new Error('This should not happen.');
-} catch (e) {
-  // this is expected
-  console.log(`Error: ${e.constructor.name}`);
-  console.log("`aliceIdentity` was not able to access Bob's data (expected).\n");
-  } */
+
+  const policy = await Parcel.WhitelistPolicy.create(
+    endUserConfig,
+    endUserIndentity, // The policy creator, and subsequent owner.
+    new Parcel.Set([adminIdentity.address]), // The set of whitelisted identities.
+    );
+    await dataset.setPolicy(policy);
+    console.log(
+        `Created policy with address ${policy.address.hex} and applied it to dataset ${dataset.address.hex}\n`,
+    );
+  
+  //try to download using admin identity
+  /* const datasetToDownload = await Parcel.Dataset.connect(dataset.address, adminIdentity, config);
+  
+    try {
+    console.log(`Attempting to access endUser's data without permission...`);
+    await new Promise((resolve, reject) => {
+        const decryptedStream = datasetToDownload.download();
+        decryptedStream.on('error', reject);
+        decryptedStream.on('end', resolve);
+    });
+    throw new Error('This should not happen.');
+  } catch (e) {
+    // this is expected
+    console.log(`Error: ${e.constructor.name}`);
+    console.log("`adminIdentity` was not able to access endUser's data (expected).\n");
+    } */
   
   //should be ok to download
-  console.log("downloading bob's data using bob identnty")
-  const bobToDownload = await Parcel.Dataset.connect(dataset.address, bobIndentity, config)
-  const goodStream = bobToDownload.download();
-  
-  //write to stream
-  const secretDatasetWriter = goodStream.pipe(
-    require('fs').createWriteStream('./user_data'),
-);
+};
 
-// Utility method.
+
+
+//frontend client_id(from config.js)
+export async function download_compute(address: string,api_Access_token:string,datasets: []) {
+  //whitelist the server to take endUser's config
+  const endUserIdentityAddress = new Parcel.Address(address);
+  const endUserConfig = new Parcel.Config({
+    apiAccessToken: "AAAAGYHZxhwjJXjnGEIiyDCyZJq+Prknbneb9gYe9teCKrGa",
+  });
+  const endUserIdentity = await Parcel.Identity.connect(endUserIdentityAddress, endUserConfig);
+
+const adminConfig = new Parcel.Config(Parcel.Config.paramsFromEnv());
+  const adminIdentityAddress = Parcel.Identity.addressFromToken(
+    await adminConfig.tokenProvider.getToken(),
+  );
+  const adminIdentity = await Parcel.Identity.connect(adminIdentityAddress, config);
+
+
+  //download dataset
+  const writestream = "../docker/test_workdir/data/in/intext"
   const streamFinished = require('util').promisify(require('stream').finished);
-  try {
-      await streamFinished(secretDatasetWriter);
-      console.log(`Dataset ${bobToDownload.address.hex} has been downloaded to ./user_data`);
-  } catch (e) {
-      throw new Error(`Failed to download dataset at ${bobToDownload.address.hex}`);
+  let datasetByadmin = await Parcel.Dataset.connect(endUserIdentityAddress, adminIdentity, adminConfig);
+    try {
+        const secretDataStream = datasetByadmin.download();
+        const secretDatasetWriter = secretDataStream.pipe(
+            require('fs').createWriteStream(writestream),
+        );
+        await streamFinished(secretDatasetWriter);
+        console.log(
+            `\nDataset ${datasetByadmin.address.hex} has been downloaded to ${writestream}`);
+    } catch (e) {
+        throw new Error(`Failed to download dataset at ${datasetByadmin.address.hex}`);
+    }
+    const secretDataByadmin = require('fs').readFileSync(writestream).toString();
+    console.log(`Here's the data: ${secretDataByadmin}`);
+  
+  //compute
+  const jobRequest = {
+    name: 'interest_classificaiton',
+    dockerImage: 'oasislabs/acme-derma-demo',
+    inputDatasets: [{ mountPath: 'intext.txt', address: endUserIdentityAddress },
+      {mountPath : 'label.txt', address: endUserIdentityAddress}],
+    outputDatasets: [{ mountPath: 'prediction.txt', owner: endUserIdentity }],
+    cmd: [
+        'python3',
+        'predict.py',
+        '/parcel/data/in/intext.txt',
+        '/parcel/data/in/label.txt',
+        '/parcel/data/out/prediction.txt',
+    ],
+  };
+  const dispatcher = await Parcel.Dispatcher.connect(config.dispatcherAddress, endUserIdentity, config);
+  const jobId = await dispatcher.submitJob({ job: jobRequest });
+  
+  const job = await dispatcher.getCompletedJobInfo(jobId);
+  if (job.status instanceof Parcel.JobCompletionStatus.Success) {
+      console.log('Job completed successfully!');
+  } else {
+      console.log('Job failed!', job.info);
   }
-  const secretData = require('fs').readFileSync('./user_data').toString();
-  console.log(`Hey dataset owner! Here's your data: ${secretData}\n`);
-    
+
+  if (job.outputs[0]) {
+    const output = await Parcel.Dataset.connect(job.outputs[0].address, endUserIdentity, config);
+    output.downloadToPath('/tmp/job_out');
+    console.log('Job output stored in /tmp/job_out.');
 }
 
-
-
-main()
-    .then(() => console.log('All done!'))
-    .catch((err) => {
-        console.log(`Error in main(): ${err.stack || JSON.stringify(err)}`);
-        process.exitCode = 1;
-    });
+}

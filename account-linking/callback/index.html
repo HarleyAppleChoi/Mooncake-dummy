@@ -13,7 +13,8 @@
   <body>
     <div class="main">
       <div id="response">
-        <button id="myData" data-cy="myData"></button>
+        <div id="data"></div>
+         <!--  <button id="myData" data-cy="myData"></button> -->
         <h2>Welcome to All My Chard</h2>
         <!-- like button to see which post (0-11) to like -->
         <h2>Like which post?</h2>
@@ -26,9 +27,9 @@
         <h2>Comment which post?</h2>
         <form>
           <label for="fname">Post number:</label><br>
-          <input type="text" id="comment-post-name" name="comment-post-name" data-cy="comment-post-id"><br>
+          <input type="text" id="comment_post_id" name="comment_post_id" data-cy="comment_post_id"><br>
           <label for="fname">Comment:</label><br>
-          <input type="text" id="comment-post-text" name="comment-post-text" data-cy="comment-post-text"><br>
+          <input type="text" id="comment_post_text" name="comment_post_text" data-cy="comment_post_text"><br>
           <input type="button" value="Comment!" id="comment-button">
         </form>
         <!-- #region snippet-show -->
@@ -47,114 +48,29 @@
     <script src="callback/appoloconfig.js" type="text/javascript"></script>
     <script src="config.js" type="text/javascript"></script>
     <script>
+    import uploadsToParcel  from './action';
 
     document.getElementById("comment-button").onclick = function() {(comment_click())};
-    document.getElementById("comment-button").onclick = function() {(like_click())};
+    document.getElementById("like-button").onclick = function() {(like_click())};
 
     function like_click() {
-        document.getElementById(like_post_id).innerText
-        console.log()
+        upload(parseInt(document.getElementById('like_post_id').value));
     }
 
-    function comment_click(){
-        upload()
-        
+    export function comment_click(){
+      console.log("clicked")
+      var postId = document.getElementById('comment_post_id').value;
+      var comment = document.getElementById('comment_post_text').value;
+      upload(parseInt(postId),comment);
     }
 
-    function upload(){
-        var userID = document.getElementById('user-id').innerText
-
+    function upload(postId,comment=""){
+        var userID = document.getElementById('user-id').innerText;
+        console.log(jsonlist.posts[postId].message)
+        //uploadsToParcel(userID,jsonlist.posts[postId].message+" "+comment)
     }
 
     </script>
-    <script>
-
-var myList = document.querySelector('ul');
-
-const query = `{
-  posts: post(where: {parent_id: {_is_null: true}, subspace: {_eq: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}}, order_by: {created: desc}, offset: 1, limit: 11) {
-    id
-    parent_id
-    subspace
-    created
-    hidden
-    last_edited
-    allows_comments
-    message
-    optional_data
-    media: medias {
-      uri
-      mime_type
-    }
-    poll {
-      question
-      end_date
-      allows_answer_edits
-      allows_multiple_answers
-      available_answers {
-        id: answer_id
-        text: answer_text
-      }
-      user_answers {
-        answer
-        user {
-          address
-          dtag
-          moniker
-          cover_pic
-          profile_pic
-          bio
-        }
-      }
-    }
-    reactions {
-      user: owner {
-        address
-        dtag
-        moniker
-        cover_pic
-        profile_pic
-        bio
-      }
-      value
-    }
-    user: creator {
-      address
-      dtag
-      moniker
-      cover_pic
-      profile_pic
-      bio
-    }
-    comments: comments {
-      id
-    }
-  }
-}
-`
-
-  //getPostDetails
-  fetch('https://gql.morpheus.desmos.network/v1/graphql', { 
-    method: 'POST',   
-    headers: { 'Content-Type': 'application/json' },   
-    body: JSON.stringify({ 
-      query: query}), 
-    })   .then(res => res.json())
-    .then(json => json)
-    .then(data => 
-      {
-        console.log(json)
-        var listItem = document.getElementById('myData');
-        for(var i = 0;i< data.data.posts.length;i++) {
-        listItem.innerHTML = 'posts:'+ data.data.posts[i].message ;
-        listItem.innerHTML +=' created in: ' + data.data.posts[i].created + '.';
-        listItem.innerHTML +=' Post by :' + data.data.posts[i].address;
-        myList.appendChild(listItem);
-      }})
-    .catch(err => console.log(err.message, 'error'))
-    ;
-    </script>
-
     <script>
       Oidc.Log.logger = console;
       Oidc.Log.level = Oidc.Log.DEBUG;

@@ -152,26 +152,28 @@ const query = `{
 }
 `
 
-  //getPostDetails
-  fetch('https://gql.morpheus.desmos.network/v1/graphql', { 
-    method: 'POST',   
-    headers: { 'Content-Type': 'application/json' },   
-    body: JSON.stringify({ 
-      query: query}), 
-    })   .then(res => res.json())
-    .then(json => console.log(json))
-    .then(data => 
-      
-      {
-        var listItem = document.getElementById('myData');
-        for(var i = 0;i< data.posts.length;i++) {
-        listItem.innerHTML = 'posts:'+ data.post[i].message ;
-        listItem.innerHTML +=' created in: ' + data.post[i].created + '.';
-        listItem.innerHTML +=' Post by :' + data.post[i].address;
-        myList.appendChild(listItem);
-      }})
-    .catch(err => console.log(err.message, 'error'))
-    ;
+var jsonlist;
+//getPostDetails
+fetch('https://gql.morpheus.desmos.network/v1/graphql', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: query}),
+  })   .then(res => res.json())
+  .then(data =>
+    {var listItem = document.getElementById('data');
+    console.log(data)
+      for(var i = 0;i< data.data.posts.length;i++) {
+      listItem.innerHTML += "<h1>Post "+i +"</h>";
+      listItem.innerHTML += "<h2>message</h2><p> "+ data.data.posts[i].message +"</p>";
+      listItem.innerHTML += "<h2>created in </h2> <p>"+ data.data.posts[i].created +"</p>";
+      listItem.innerHTML += "<h2>Post by </h2> <p>"+ data.data.posts[i].address +"</p>";
+    } 
+    jsonlist=data.data
+    //listItem.innerText= JSON.stringify(data.data)
+  })
+  .catch(err => console.log(err.message, 'error'))
+
 
 /*  */
 
